@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>radiation: ultraviolet lectures</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="radiation">
+<div class="grain"></div>
+<nav class="strip">
+<a class="home" href="index2.html" title="Back to Home">←</a>
+<a class="wheel on" href="radiation.html" title="Radiation"></a>
+<a href="red.html"><i style="background:#e0526a"></i>red</a>
+<a href="orange.html"><i style="background:#f59a4b"></i>orange</a>
+<a href="yellow.html"><i style="background:#f2d44e"></i>yellow</a>
+<a href="green.html"><i style="background:#4fc08d"></i>green</a>
+<a href="blue.html"><i style="background:#4a7be0"></i>blue</a>
+<a href="indigo.html"><i style="background:#5a43b8"></i>indigo</a>
+<a href="violet.html"><i style="background:#9b5ae0"></i>violet</a>
+<a href="ultraviolet.html"><i style="background:#c4a2f0"></i>ultraviolet</a>
+</nav>
+<main>
+<blockquote class="opening-quote">“Light, with which we see, is only one small part of a vast spectrum of the same kind of thing.”</blockquote>
+
+<section class="rail-wrap">
+<div class="rail" id="rail">
+<div class="marker" id="marker"></div>
+</div>
+<div class="bands" id="bands">
+<span data-r="radio" style="--x:13.3%">radio</span>
+<span data-r="microwave" style="--x:33.3%" class="lo">microwave</span>
+<span data-r="infrared" style="--x:50.5%">infrared</span>
+<span data-r="visible" style="--x:61.9%" class="lo">visible</span>
+<span data-r="ultraviolet" style="--x:68%">ultraviolet</span>
+<span data-r="x-ray" style="--x:83.3%" class="lo">x-ray</span>
+<span data-r="gamma" style="--x:96.7%">gamma</span>
+</div>
+<div class="read">
+<div><span>wavelength</span><strong id="wl"></strong></div>
+<div><span>frequency</span><strong id="fr"></strong></div>
+<div><span>photon energy</span><strong id="en"></strong></div>
+<div><span>region</span><strong id="rg"></strong></div>
+</div>
+</section>
+
+<section class="spread">
+<figure class="note">
+<img src="images/rbow.JPG" alt="A rainbow falling through a pale grey sky into the tops of green trees" loading="lazy">
+<figcaption>“When we look at a rainbow, it looks beautiful to us.”</figcaption>
+</figure>
+</section>
+
+<blockquote class="long">“As light travels from window to floor and wall to wall, there are little wiggles of the electric and magnetic fields moving along at 186,000 miles per second. Then there are also infrared waves travelling from the warm foreheads to the cold blackboard. And we have forgotten the ultraviolet light, the x-rays, and the radiowaves travelling through the room.”</blockquote>
+</main>
+<script>
+
+// slider !!
+var rail = document.getElementById('rail');
+var marker = document.getElementById('marker');
+var labels = document.querySelectorAll('#bands span');
+
+function update(x) {
+  // marker position (fractions, 0 to 1)
+  var box = rail.getBoundingClientRect();
+  var p = Math.min(1, Math.max(0, (x - box.left) / box.width));
+  marker.style.left = p * 100 + '%';
+
+  // logarithmic scale: 1000 m to 0.000000000001 m
+  var wl = Math.pow(10, 3 - p * 15);                    // wavelength in metres
+  var f = 299792458 / wl;                               // frequency in Hz
+  var e = 6.62607015e-34 * f / 1.602176634e-19;         // energy in eV
+
+  var val, unit;
+  if (wl >= 1)         { val = wl;        unit = 'm'; }
+  else if (wl >= 1e-3) { val = wl * 1e3;  unit = 'mm'; }
+  else if (wl >= 1e-6) { val = wl * 1e6;  unit = 'µm'; }
+  else if (wl >= 1e-9) { val = wl * 1e9;  unit = 'nm'; }
+  else                 { val = wl * 1e12; unit = 'pm'; }
+
+  var region;
+  if (wl > 1)            region = 'radio';
+  else if (wl > 1e-3)    region = 'microwave';
+  else if (wl > 7e-7)    region = 'infrared';
+  else if (wl >= 3.8e-7) region = 'visible';
+  else if (wl >= 1e-8)   region = 'ultraviolet';
+  else if (wl >= 1e-11)  region = 'x-ray';
+  else                   region = 'gamma';
+
+  document.getElementById('wl').textContent = (val >= 100 ? val.toFixed(0) : val.toPrecision(3)) + ' ' + unit;
+  document.getElementById('fr').textContent = f.toExponential(2).replace('e+', ' × 10^') + ' Hz';
+  document.getElementById('en').textContent = e < 1000 ? e.toFixed(e < 0.01 ? 5 : 2) + ' eV' : e.toExponential(2) + ' eV';
+  document.getElementById('rg').textContent = region;
+
+  // bold label for current region
+  labels.forEach(function (l) { l.classList.toggle('on', l.dataset.r === region); });
+}
+
+rail.addEventListener('pointerdown', function (e) {
+  rail.setPointerCapture(e.pointerId);
+  update(e.clientX);
+});
+rail.addEventListener('pointermove', function (e) {
+  if (e.buttons) update(e.clientX);
+});
+
+// starting position (visible light)
+var start = rail.getBoundingClientRect();
+update(start.left + start.width * 0.615);
+</script>
+</body>
+</html>
